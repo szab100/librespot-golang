@@ -1,5 +1,8 @@
 ## librespot-golang
 
+This is a fork (with replaced imports and some visibility changes) of https://github.com/librespot-org/librespot-golang!
+Use this package only after verifying the last commits to see what has changed compared to the upstream! I may not keep this package maintained, so it is a better idea to create your own fork instead!
+
 ### Introduction
 
 librespot-golang is an opensource Golang library based on the [librespot](https://github.com/plietar/librespot) project, allowing you to control Spotify Connect devices, get metadata, and play music. It has itself been based on [SpotControl](https://github.com/badfortrains/spotcontrol), and its main goal is to provide a suitable replacement wfor the defunct libspotify.
@@ -13,7 +16,7 @@ This fork contains changes that are more compatible with go.mod, while removing 
 This package can be installed using:
 
 ```sh
-go get github.com/librespot-org/librespot-golang/librespot
+go get github.com/szab100/librespot-golang/librespot
 ```
 
 ### Usage
@@ -21,7 +24,7 @@ go get github.com/librespot-org/librespot-golang/librespot
 To use the package look at the example micro-controller (for Spotify Connect). For the CLI, install the main package:
 
 ```sh
-go get -u github.com/librespot-org/librespot-golang
+go get -u github.com/szab100/librespot-golang
 ```
 
 ### Building for mobile
@@ -31,7 +34,7 @@ The package `librespotmobile` contains bindings suitable for use with Gomobile, 
 To get started, install gomobile, and simply run (for Android):
 
 ```sh
-cd $GOPATH/src/github.com/librespot-org/librespot-golang
+cd $GOPATH/src/github.com/szab100/librespot-golang
 gomobile init -ndk /path/to/android-ndk
 gomobile bind librespotmobile
 ```

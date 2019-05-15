@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/librespot-org/librespot-golang/Spotify"
-	"github.com/librespot-org/librespot-golang/librespot/connection"
-	"github.com/librespot-org/librespot-golang/librespot/mercury"
 	"log"
 	"sync"
+
+	"github.com/szab100/librespot-golang/Spotify"
+	"github.com/szab100/librespot-golang/librespot/connection"
+	"github.com/szab100/librespot-golang/librespot/mercury"
 )
 
 type Player struct {
@@ -71,6 +72,10 @@ func (p *Player) loadTrackKey(trackId []byte, fileId []byte) ([]byte, error) {
 	p.seqChans.Delete(seqInt)
 
 	return key, nil
+}
+
+func (p *Player) LoadTrackKey(trackId []byte, fileId []byte) ([]byte, error) {
+	return p.loadTrackKey(trackId, fileId)
 }
 
 func (p *Player) AllocateChannel() *Channel {

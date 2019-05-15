@@ -6,11 +6,12 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 	"fmt"
-	"github.com/librespot-org/librespot-golang/Spotify"
-	"github.com/librespot-org/librespot-golang/librespot/connection"
 	"io"
 	"math"
 	"sync"
+
+	"github.com/szab100/librespot-golang/Spotify"
+	"github.com/szab100/librespot-golang/librespot/connection"
 )
 
 const kChunkSize = 32768 // In number of words (so actual byte size is kChunkSize*4, aka. kChunkByteSize)
@@ -64,6 +65,18 @@ func newAudioFileWithIdAndFormat(fileId []byte, format Spotify.AudioFile_Format,
 // Size returns the size, in bytes, of the final audio file
 func (a *AudioFile) Size() uint32 {
 	return a.size - uint32(a.headerOffset())
+}
+
+func (a *AudioFile) SizeWithHeaderOffset() uint32 {
+	return a.size
+}
+
+func (a *AudioFile) GetFileId() []byte {
+	return a.fileId
+}
+
+func (a *AudioFile) GetPlayer() *Player {
+	return a.player
 }
 
 // Read is an implementation of the io.Reader interface. Note that due to the nature of the streaming, we may return

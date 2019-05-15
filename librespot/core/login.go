@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/librespot-org/librespot-golang/Spotify"
-	"github.com/librespot-org/librespot-golang/librespot/connection"
-	"github.com/librespot-org/librespot-golang/librespot/discovery"
-	"github.com/librespot-org/librespot-golang/librespot/utils"
 	"log"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/szab100/librespot-golang/Spotify"
+	"github.com/szab100/librespot-golang/librespot/connection"
+	"github.com/szab100/librespot-golang/librespot/discovery"
+	"github.com/szab100/librespot-golang/librespot/utils"
 )
 
 var Version = "master"
@@ -87,10 +88,10 @@ func LoginDiscoveryBlobFile(cacheBlobPath, deviceName string) (*Session, error) 
 // Login to Spotify using the OAuth method
 func LoginOAuth(deviceName string, clientId string, clientSecret string) (*Session, error) {
 	token := getOAuthToken(clientId, clientSecret)
-	return loginOAuthToken(token.AccessToken, deviceName)
+	return LoginOAuthToken(token.AccessToken, deviceName)
 }
 
-func loginOAuthToken(accessToken string, deviceName string) (*Session, error) {
+func LoginOAuthToken(accessToken string, deviceName string) (*Session, error) {
 	s, err := setupSession()
 	if err != nil {
 		return s, err

@@ -3,10 +3,10 @@ package mercury
 import (
 	"encoding/binary"
 	"github.com/golang/protobuf/proto"
-	"github.com/librespot-org/librespot-golang/Spotify"
-	"github.com/librespot-org/librespot-golang/librespot/connection"
-	"github.com/librespot-org/librespot-golang/librespot/core"
-	"github.com/librespot-org/librespot-golang/librespot/spirc"
+	"github.com/szab100/librespot-golang/Spotify"
+	"github.com/szab100/librespot-golang/librespot/connection"
+	"github.com/szab100/librespot-golang/librespot/core"
+	"github.com/szab100/librespot-golang/librespot/spirc"
 	"testing"
 )
 
