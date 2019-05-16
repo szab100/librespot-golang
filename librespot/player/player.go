@@ -37,10 +37,14 @@ func CreatePlayer(conn connection.PacketStream, client *mercury.Client) *Player 
 }
 
 func (p *Player) LoadTrack(file *Spotify.AudioFile, trackId []byte) (*AudioFile, error) {
-	return p.LoadTrackWithIdAndFormat(file.FileId, file.GetFormat(), trackId)
+	return p.LoadTrackWithIdAndFormat(file.FileId, file.GetFormat(), trackId, true)
 }
 
-func (p *Player) LoadTrackWithIdAndFormat(fileId []byte, format Spotify.AudioFile_Format, trackId []byte) (*AudioFile, error) {
+func (p *Player) LoadTrackUnencrypted(file *Spotify.AudioFile, trackId []byte) (*AudioFile, error) {
+	return p.LoadTrackWithIdAndFormat(file.FileId, file.GetFormat(), trackId, false)
+}
+
+func (p *Player) LoadTrackWithIdAndFormat(fileId []byte, format Spotify.AudioFile_Format, trackId []byte, decrypt bool) (*AudioFile, error) {
 	// fmt.Printf("[player] Loading track audio key, fileId: %s, trackId: %s\n", utils.ConvertTo62(fileId), utils.ConvertTo62(trackId))
 
 	// Allocate an AudioFile and a channel
@@ -50,7 +54,7 @@ func (p *Player) LoadTrackWithIdAndFormat(fileId []byte, format Spotify.AudioFil
 	err := audioFile.loadKey(trackId)
 
 	// Then start loading the audio itself
-	audioFile.loadChunks()
+	audioFile.loadChunks(decrypt)
 
 	return audioFile, err
 }
@@ -78,9 +82,9 @@ func (p *Player) LoadTrackKey(trackId []byte, fileId []byte) ([]byte, error) {
 	return p.loadTrackKey(trackId, fileId)
 }
 
-func (p *Player) AllocateChannel() *Channel {
+func (p *Player) AllocateChannel(decrypt bool) *Channel {
 	p.chanLock.Lock()
-	channel := NewChannel(p.nextChan, p.releaseChannel)
+	channel := NewChannel(p.nextChan, p.releaseChannel, decrypt)
 	p.nextChan++
 
 	p.channels[channel.num] = channel

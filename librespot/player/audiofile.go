@@ -221,7 +221,7 @@ func (a *AudioFile) totalChunks() int {
 	return int(math.Ceil(float64(size) / float64(kChunkSize) / 4.0))
 }
 
-func (a *AudioFile) loadChunks() {
+func (a *AudioFile) loadChunks(decrypt bool) {
 	// By default, we will load the track in the normal order. If we need to skip to a specific piece of audio,
 	// we will prepend the chunks needed so that we load them as soon as possible. Since loadNextChunk will check
 	// if a chunk is already loaded (using hasChunk), we won't be downloading the same chunk multiple times.
@@ -230,7 +230,7 @@ func (a *AudioFile) loadChunks() {
 	// remaining chunks will be added once we get the headers with the file size.
 	a.chunkLoadOrder = append(a.chunkLoadOrder, 0)
 
-	go a.loadNextChunk()
+	go a.loadNextChunk(decrypt)
 }
 
 func (a *AudioFile) requestChunk(chunkIndex int) {
@@ -255,10 +255,10 @@ func (a *AudioFile) requestChunk(chunkIndex int) {
 	a.chunkLock.Unlock()
 }
 
-func (a *AudioFile) loadChunk(chunkIndex int) error {
+func (a *AudioFile) loadChunk(chunkIndex int, decrypt bool) error {
 	chunkData := make([]byte, kChunkByteSize)
 
-	channel := a.player.AllocateChannel()
+	channel := a.player.AllocateChannel(decrypt)
 	channel.onHeader = a.onChannelHeader
 	channel.onData = a.onChannelData
 
@@ -288,13 +288,13 @@ func (a *AudioFile) loadChunk(chunkIndex int) error {
 
 	// fmt.Printf("[AudioFile] Got encrypted chunk %d, len=%d...\n", i, len(wholeData))
 
-	a.putEncryptedChunk(chunkIndex, chunkData[0:chunkSz])
+	a.putEncryptedChunk(chunkIndex, chunkData[0:chunkSz], decrypt)
 
 	return nil
 
 }
 
-func (a *AudioFile) loadNextChunk() {
+func (a *AudioFile) loadNextChunk(decrypt bool) {
 	a.chunkLock.Lock()
 
 	if a.chunksLoading {
@@ -310,7 +310,7 @@ func (a *AudioFile) loadNextChunk() {
 	a.chunkLock.Unlock()
 
 	if !a.hasChunk(chunkIndex) {
-		a.loadChunk(chunkIndex)
+		a.loadChunk(chunkIndex, decrypt)
 	}
 
 	a.chunkLock.Lock()
@@ -318,22 +318,26 @@ func (a *AudioFile) loadNextChunk() {
 
 	if len(a.chunkLoadOrder) > 0 {
 		a.chunkLock.Unlock()
-		a.loadNextChunk()
+		a.loadNextChunk(decrypt)
 	} else {
 		a.chunkLock.Unlock()
 	}
 }
 
-func (a *AudioFile) putEncryptedChunk(index int, data []byte) {
+func (a *AudioFile) putEncryptedChunk(index int, data []byte, decrypt bool) {
 	byteIndex := index * kChunkByteSize
-	a.decrypter.DecryptAudioWithBlock(index, a.cipher, data, a.data[byteIndex:byteIndex+len(data)])
+	if decrypt {
+		a.decrypter.DecryptAudioWithBlock(index, a.cipher, data, a.data[byteIndex:byteIndex+len(data)])
+	} else {
+		copy(a.data[byteIndex:byteIndex+len(data)], data)
+	}
 
 	a.chunkLock.Lock()
 	a.chunks[index] = true
 	a.chunkLock.Unlock()
 }
 
-func (a *AudioFile) onChannelHeader(channel *Channel, id byte, data *bytes.Reader) uint16 {
+func (a *AudioFile) onChannelHeader(channel *Channel, id byte, data *bytes.Reader, decrypt bool) uint16 {
 	read := uint16(0)
 
 	if id == 0x3 {
@@ -358,7 +362,7 @@ func (a *AudioFile) onChannelHeader(channel *Channel, id byte, data *bytes.Reade
 			a.chunkLock.Unlock()
 
 			// Re-launch the chunk loading system. It will check itself if another goroutine is already loading chunks.
-			go a.loadNextChunk()
+			go a.loadNextChunk(decrypt)
 		}
 
 		// Return 4 bytes read

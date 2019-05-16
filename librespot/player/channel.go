@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 )
 
-type headerFunc func(channel *Channel, id byte, data *bytes.Reader) uint16
+type headerFunc func(channel *Channel, id byte, data *bytes.Reader, decrypt bool) uint16
 type dataFunc func(channel *Channel, data []byte) uint16
 type releaseFunc func(channel *Channel)
 
@@ -15,13 +15,15 @@ type Channel struct {
 	onHeader  headerFunc
 	onData    dataFunc
 	onRelease releaseFunc
+	decrypt   bool
 }
 
-func NewChannel(num uint16, release releaseFunc) *Channel {
+func NewChannel(num uint16, release releaseFunc, decrypt bool) *Channel {
 	return &Channel{
 		num:       num,
 		dataMode:  false,
 		onRelease: release,
+		decrypt:   decrypt,
 	}
 }
 
@@ -51,7 +53,7 @@ func (c *Channel) handlePacket(data []byte) {
 
 				read := uint16(0)
 				if c.onHeader != nil {
-					read = c.onHeader(c, headerId, dataReader)
+					read = c.onHeader(c, headerId, dataReader, c.decrypt)
 				}
 
 				// Consume the remaining un-read data
