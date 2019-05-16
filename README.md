@@ -1,6 +1,7 @@
 ## librespot-golang
 
-This is a fork (with replaced imports and some visibility changes) of https://github.com/librespot-org/librespot-golang!
+This is a fork (with replaced imports and some small changes, like visibility, optional decryption, etc) of https://github.com/librespot-org/librespot-golang!
+
 Use this package only after verifying the last commits to see what has changed compared to the upstream! I may not keep this package maintained, so it is a better idea to create your own fork instead!
 
 ### Introduction
